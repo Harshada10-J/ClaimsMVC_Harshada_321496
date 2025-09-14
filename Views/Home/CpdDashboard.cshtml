@@ -1,0 +1,71 @@
+﻿
+
+@model CpdDashboardViewModel
+@{
+    ViewData["Title"] = "CPD Dashboard";
+}
+
+<div class="main-content-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6 mb-0">Claims Dashboard</h1>
+        <a class="btn btn-primary" asp-controller="Claims" asp-action="History">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder-fill me-2" viewBox="0 0 16 16"><path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z" /></svg>
+            View Full History
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="me-3">
+                            <div class="text-white-75 small">Pending Review</div>
+                            <div class="text-lg fw-bold">@Model.PendingClaimsCount Claims</div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .586.023l-.07-.004.07.004zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.036c.386.07.76.18 1.126.322l-.36.113zM8.5 5.5a.5.5 0 0 0-1 0v3.352l-2.862 2.862a.5.5 0 0 0 .707.707l2.5-2.5a.5.5 0 0 0 .146-.353V5.5z" /><path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm7-8a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" /></svg>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="Claims" asp-action="History" asp-route-status="Pending">View All Pending Claims</a>
+                    <div class="small text-white"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" /></svg></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="mt-4">Recently Submitted Claims</h4>
+    @if (Model.RecentPendingClaims.Any())
+    {
+    <table class="table table-hover table-bordered align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Claim ID</th>
+                <th>Employee Name</th>
+                <th>Date</th>
+                <th class="text-end">Amount</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var claim in Model.RecentPendingClaims)
+                {
+            <tr>
+                <td>@claim.ClaimId</td>
+                <td>@claim.User?.FullName</td>
+                <td>@claim.SubmissionDate.ToShortDateString()</td>
+                <td class="text-end">₹@claim.TotalAmount.ToString("N2")</td>
+                <td class="text-center">
+                    <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-primary btn-sm">Review</a>
+                </td>
+            </tr>
+                }
+        </tbody>
+    </table>
+    }
+    else
+    {
+    <div class="alert alert-secondary mt-3">There are no pending claims at this time.</div>
+    }
+</div>
+

@@ -1,0 +1,131 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using ClaimsMVC.Data.Models;
+using ClaimsMVC.ViewModels;
+using ClaimsMVC.Services;
+using Microsoft.EntityFrameworkCore;
+
+namespace ClaimsMVC.Controllers
+{
+    public class AccountController : Controller
+    {
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        private readonly EmailService _emailService;
+        private readonly ClaimsContextDB _context;
+
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, EmailService emailService, ClaimsContextDB context)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _emailService = emailService;
+            _context = context;
+        }
+
+        // GET: /Account/Login
+        [HttpGet]
+        public IActionResult Login(string? returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            // Pass a new, empty model to the view to prevent the error.
+            return View(new LoginViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            if (ModelState.IsValid)
+            {
+                // NOTE: The check for EmailConfirmed has been removed from here.
+                var result = await _signInManager.PasswordSignInAsync(model.EmployeeNo, model.Password, isPersistent: false, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    return LocalRedirect(returnUrl ?? "/");
+                }
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            }
+            return View(model);
+        }
+
+        // GET: /Account/Register
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        // POST: /Account/Register
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // --- THIS IS THE NEW, CORRECT LOGIC ---
+
+                // 1. Check if the employee exists in the company's master list.
+                var companyEmployee = await _context.CompanyEmployees
+                    .FirstOrDefaultAsync(e => e.EmployeeNo == model.EmployeeNo);
+
+                if (companyEmployee == null)
+                {
+                    ModelState.AddModelError("EmployeeNo", "This employee number is not registered with the company.");
+                    return View(model);
+                }
+
+                // 2. Check if an online account has already been created for this employee.
+                var existingUser = await _userManager.FindByNameAsync(model.EmployeeNo);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("EmployeeNo", "An online account has already been registered for this employee number.");
+                    return View(model);
+                }
+
+                // If checks pass, create the new user using the submitted details.
+                var user = new User
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserName = model.EmployeeNo,
+                    EmployeeNo = model.EmployeeNo,
+                    FullName = model.FullName,
+                    Email = model.Email,
+                    // Auto-assign the designation from the master list.
+                    DesignationId = companyEmployee.DesignationId,
+                    EmailConfirmed = true // The email is now considered confirmed by default.
+                };
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(user, "Employee");
+
+                    // Immediately sign the new user in and redirect to the home page.
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            return View(model);
+        }
+
+
+ 
+        // POST: /Account/Logout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+    }
+}
+

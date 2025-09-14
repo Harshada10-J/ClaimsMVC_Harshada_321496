@@ -1,0 +1,32 @@
+@model RejectClaimViewModel
+@{
+    ViewData["Title"] = "Reject Claim";
+}
+
+<div class="main-content-card">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+    <h3>Are you sure you want to reject this claim for @Model.EmployeeName?</h3>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Reject" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                <!-- THIS IS THE CRITICAL FIX -->
+                <input type="hidden" asp-for="ClaimId" />
+
+                <div class="form-floating mb-3">
+                    <textarea asp-for="Reason" class="form-control" placeholder="Reason for Rejection" style="height: 120px"></textarea>
+                    <label asp-for="Reason" class="control-label"></label>
+                    <span asp-validation-for="Reason" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-4">
+                    <input type="submit" value="Confirm Rejection" class="btn btn-danger btn-lg" />
+                    <a asp-action="Details" asp-route-id="@Model.ClaimId" class="btn btn-secondary btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

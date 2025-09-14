@@ -1,0 +1,162 @@
+﻿@*@model ClaimDetailsViewModel
+    @{
+        ViewData["Title"] = "Claim Details";
+    }
+
+    <h1>@ViewData["Title"]</h1>
+    <h4>Claim ID: @Model.ClaimId</h4>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-5">@Html.DisplayNameFor(model => model.Status)</dt>
+                <dd class="col-sm-7">@Model.Status</dd>
+
+                <dt class="col-sm-5">@Html.DisplayNameFor(model => model.SubmissionDate)</dt>
+                <dd class="col-sm-7">@Model.SubmissionDate.ToShortDateString()</dd>
+
+                <dt class="col-sm-5">@Html.DisplayNameFor(model => model.FullName)</dt>
+                <dd class="col-sm-7">@Model.FullName (@Model.EmployeeNo)</dd>
+            </dl>
+        </div>
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-5">@Html.DisplayNameFor(model => model.TotalAmount)</dt>
+                <dd class="col-sm-7">₹@Model.TotalAmount</dd>
+
+                <dt class="col-sm-5">@Html.DisplayNameFor(model => model.ApprovedAmount)</dt>
+                <dd class="col-sm-7">@(Model.ApprovedAmount.HasValue ? "₹" + Model.ApprovedAmount.Value : "N/A")</dd>
+
+                @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                {
+                <dt class="col-sm-5">@Html.DisplayNameFor(model => model.RejectionReason)</dt>
+                <dd class="col-sm-7">@Model.RejectionReason</dd>
+                }
+            </dl>
+        </div>
+    </div>
+
+    <h5 class="mt-4">Claimed Items</h5>
+    <table class="table table-sm table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Item Name</th>
+                <th class="text-end">Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+            <tr>
+                <td>@item.ItemName</td>
+                <td class="text-end">₹@item.Cost</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    <hr />
+
+    <div>
+        @if (User.IsInRole("CPD") && Model.Status == "Pending")
+        {
+        <a asp-controller="Claims" asp-action="Approve" asp-route-id="@Model.ClaimId" class="btn btn-success">Approve</a>
+        <a asp-controller="Claims" asp-action="Reject" asp-route-id="@Model.ClaimId" class="btn btn-danger">Reject</a>
+        <span class="mx-2">|</span>
+        }
+        <a asp-action="History">Back to History</a>
+    </div>*@
+
+@model ClaimDetailsViewModel
+@{
+    ViewData["Title"] = "Claim Details";
+}
+
+<div class="main-content-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">@ViewData["Title"]</h2>
+        <span class="badge bg-primary rounded-pill fs-6">Claim ID: @Model.ClaimId</span>
+    </div>
+    <hr />
+
+    <h4>Summary</h4>
+    <div class="row mt-3 mb-4 fs-5">
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-5 text-muted fw-light">Employee Name</dt>
+                <dd class="col-sm-7">@Model.FullName (@Model.EmployeeNo)</dd>
+
+                <dt class="col-sm-5 text-muted fw-light">Submission Date</dt>
+                <dd class="col-sm-7">@Model.SubmissionDate.ToShortDateString()</dd>
+
+                <dt class="col-sm-5 text-muted fw-light">Status</dt>
+                <dd class="col-sm-7"><span class="badge bg-info text-dark">@Model.Status</span></dd>
+            </dl>
+        </div>
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-5 text-muted fw-light">Total Claimed</dt>
+                <dd class="col-sm-7">₹@Model.TotalAmount.ToString("N2")</dd>
+
+                <dt class="col-sm-5 text-muted fw-light">Amount Approved</dt>
+                <dd class="col-sm-7">@(Model.ApprovedAmount.HasValue ? "₹" + Model.ApprovedAmount.Value.ToString("N2") : "N/A")</dd>
+
+                @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                {
+                <dt class="col-sm-5 text-muted fw-light">Reason for Rejection</dt>
+                <dd class="col-sm-7 text-danger">@Model.RejectionReason</dd>
+                }
+            </dl>
+        </div>
+    </div>
+
+    <h4 class="mt-4">Claimed Items</h4>
+    <table class="table table-striped table-bordered mt-3">
+        <thead class="table-light">
+            <tr>
+                <th>Item Name</th>
+                <th class="text-end" style="width: 20%;">Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+            <tr>
+                <td>@item.ItemName</td>
+                <td class="text-end">₹@item.Cost.ToString("N2")</td>
+            </tr>
+            }
+        </tbody>
+        <tfoot class="table-group-divider">
+            <tr class="fw-bold">
+                <td class="text-end">Total:</td>
+                <td class="text-end">₹@Model.TotalAmount.ToString("N2")</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <hr class="my-4" />
+
+    <div class="d-flex justify-content-between">
+        <a asp-action="History" class="btn btn-secondary btn-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle-fill me-2" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z" /></svg>
+            Back to History
+        </a>
+
+        @if (User.IsInRole("CPD") && Model.Status == "Pending")
+        {
+        <div>
+            <a asp-controller="Claims" asp-action="Approve" asp-route-id="@Model.ClaimId" class="btn btn-success btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" /></svg>
+                Approve
+            </a>
+            <a asp-controller="Claims" asp-action="Reject" asp-route-id="@Model.ClaimId" class="btn btn-danger btn-lg ms-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z" /></svg>
+                Reject
+            </a>
+        </div>
+        }
+    </div>
+</div>
+

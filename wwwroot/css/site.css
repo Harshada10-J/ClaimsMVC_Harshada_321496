@@ -1,0 +1,22 @@
+html {
+    font-size: 14px;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    background-color: #f8f9fa; /* A light grey background for a professional feel */
+}
+
+.main-content-card {
+    padding: 2rem;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.icon-display {
+    font-size: 4rem;
+    color: #dc3545; /* Bootstrap's danger color */
+    margin-bottom: 1rem;
+}

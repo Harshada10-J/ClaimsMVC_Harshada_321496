@@ -1,0 +1,65 @@
+﻿@model EmployeeDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="main-content-card">
+    <div class="text-center border-bottom pb-4 mb-4">
+        <h1 class="display-5">Welcome, @Model.FullName!</h1>
+        <p class="lead text-muted">Your one-stop place to manage your medical claims.</p>
+        <a class="btn btn-primary btn-lg mt-3" asp-controller="Claims" asp-action="Submit">
+            <svg xmlns="http://www.w.3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill me-2" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z" /></svg>
+            Submit a New Claim
+        </a>
+    </div>
+
+    <h4 class="mt-4">Your 5 Most Recent Claims</h4>
+
+    @if (Model.RecentClaims.Any())
+    {
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle mt-3">
+            <thead class="table-light">
+                <tr>
+                    <th>Claim ID</th>
+                    <th>Submission Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Amount Claimed</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var claim in Model.RecentClaims)
+                    {
+                <tr>
+                    <td>@claim.ClaimId</td>
+                    <td>@claim.SubmissionDate.ToShortDateString()</td>
+                    <td>
+                        @{
+                                    var statusClass = claim.Status switch
+                                    {
+                                        "Approved" => "bg-success",
+                                        "Rejected" => "bg-danger",
+                                        "Pending" => "bg-warning text-dark",
+                                        _ => "bg-secondary"
+                                    };
+                        }
+                        <span class="badge @statusClass rounded-pill p-2">@claim.Status</span>
+                    </td>
+                    <td class="text-end">₹@claim.TotalAmount.ToString("N2")</td>
+                    <td class="text-center">
+                        <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-outline-primary btn-sm">Details</a>
+                    </td>
+                </tr>
+                    }
+            </tbody>
+        </table>
+    </div>
+    }
+    else
+    {
+    <div class="alert alert-secondary mt-3">
+        You have not submitted any claims yet. Click the "Submit a New Claim" button to get started!
+    </div>
+    }
+</div>

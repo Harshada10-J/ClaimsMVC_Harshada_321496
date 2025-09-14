@@ -1,0 +1,109 @@
+﻿@model IEnumerable<ClaimsMVC.Data.Models.Claim>
+    @{
+    ViewData["Title"] = "Claims History";
+
+    // --- THIS IS THE FIX ---
+    // We create the list for the dropdown here to avoid syntax errors.
+    var statusList = new SelectList(new[] { "Pending", "Approved", "Rejected" }, ViewData["CurrentStatus"] as string);
+    }
+
+    <div class="main-content-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">@ViewData["Title"]</h2>
+        </div>
+
+        @if (User.IsInRole("CPD"))
+    {
+        <div class="card bg-light mb-4 border-0">
+            <div class="card-body">
+                <h5 class="card-title">Filter Claims</h5>
+                <form asp-action="History" method="get" class="row g-3 align-items-end">
+
+                    <div class="col-md-3">
+                        <label for="claimIdFilter" class="form-label">By Claim ID</label>
+                        <input type="number" name="claimId" id="claimIdFilter" class="form-control" value="@ViewData["CurrentClaimId"]">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="dateFilter" class="form-label">By Submission Date</label>
+                        <input type="date" name="submissionDate" id="dateFilter" class="form-control" value="@ViewData["CurrentDate"]">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="statusFilter" class="form-label">By Status</label>
+                        <!-- This line now correctly uses the list we created above -->
+                        <select name="status" id="statusFilter" class="form-select" asp-items="statusList">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel-fill me-2" viewBox="0 0 16 16"><path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z" /></svg>
+                            Filter
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    }
+
+        <table class="table table-hover table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Claim ID</th>
+                    <th>Submission Date</th>
+                    <th>Status</th>
+                    @if (User.IsInRole("CPD"))
+                {
+                    <th>Employee</th>
+                }
+                    <th class="text-end">Total Amount</th>
+                    <th class="text-end">Approved Amount</th>
+                    <th class="text-center" style="width: 10%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                <tr>
+                    <td>@item.ClaimId</td>
+                    <td>@item.SubmissionDate.ToShortDateString()</td>
+                    <td>
+                        @{
+                                var statusClass = item.Status switch
+                                {
+                                    "Approved" => "bg-success",
+                                    "Rejected" => "bg-danger",
+                                    "Pending" => "bg-warning text-dark",
+                                    _ => "bg-secondary"
+                                };
+                        }
+                        <span class="badge @statusClass rounded-pill p-2">@item.Status</span>
+                    </td>
+                    @if (User.IsInRole("CPD"))
+                        {
+                    <td>@item.User?.FullName</td>
+                        }
+                    <td class="text-end">₹@item.TotalAmount.ToString("N2")</td>
+                    <td class="text-end">@(item.ApprovedAmount.HasValue ? "₹" + item.ApprovedAmount.Value.ToString("N2") : "N/A")</td>
+                    <td class="text-center">
+                        <a asp-controller="Claims" asp-action="Details" asp-route-id="@item.ClaimId" class="btn btn-outline-primary btn-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" /><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" /></svg>
+                        </a>
+                    </td>
+                </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center">No claims found.</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
