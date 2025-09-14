@@ -7,5 +7,6 @@ namespace ClaimsMVC.ViewModels
     {
         public required string FullName { get; set; }
         public List<Claim> RecentClaims { get; set; } = new List<Claim>();
+        public string? PreviousLoginTime { get; set; }
     }
 }

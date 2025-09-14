@@ -23,17 +23,16 @@ namespace ClaimsMVC.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Check if the user is authenticated
+      
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    // This should not happen for a logged-in user, but it's a safe fallback.
+         
                     return Challenge();
                 }
 
-                // If the user is in the "CPD" role, show them the CPD dashboard
                 if (await _userManager.IsInRoleAsync(user, "CPD"))
                 {
                     var pendingClaims = _context.Claims.Where(c => c.Status == "Pending");
@@ -45,7 +44,7 @@ namespace ClaimsMVC.Controllers
                     return View("CpdDashboard", viewModel);
                 }
 
-                // If the user is in the "Employee" role, show them their dashboard
+             
                 if (await _userManager.IsInRoleAsync(user, "Employee"))
                 {
                     var viewModel = new EmployeeDashboardViewModel
@@ -55,13 +54,13 @@ namespace ClaimsMVC.Controllers
                            .Where(c => c.EmployeeId == user.Id)
                            .OrderByDescending(c => c.SubmissionDate)
                            .Take(5)
-                           .ToListAsync()
+                           .ToListAsync(),
+                        PreviousLoginTime = TempData["PreviousLoginTime"] as string
                     };
                     return View("EmployeeDashboard", viewModel);
                 }
             }
 
-            // If the user is not logged in, show the default public home page
             return View();
         }
 

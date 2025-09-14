@@ -6,15 +6,22 @@ namespace ClaimsMVC.Data.Models
 {
     public class ClaimsContextDB : IdentityDbContext<User, IdentityRole, string>
     {
+
+
         public ClaimsContextDB(DbContextOptions<ClaimsContextDB> options)
             : base(options)
         {
+
+        
         }
 
         public DbSet<Claim> Claims { get; set; }
         public DbSet<ClaimItem> ClaimItems { get; set; }
         public DbSet<Designation> Designations { get; set; }
         public DbSet<CompanyEmployee> CompanyEmployees { get; set; }
+    
+
+
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -49,4 +56,7 @@ namespace ClaimsMVC.Data.Models
         }
     }
 }
+
+
+
 

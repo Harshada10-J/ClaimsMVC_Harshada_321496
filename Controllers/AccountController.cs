@@ -30,7 +30,7 @@ namespace ClaimsMVC.Controllers
         public IActionResult Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            // Pass a new, empty model to the view to prevent the error.
+         
             return View(new LoginViewModel());
         }
 
@@ -41,12 +41,27 @@ namespace ClaimsMVC.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                // NOTE: The check for EmailConfirmed has been removed from here.
-                var result = await _signInManager.PasswordSignInAsync(model.EmployeeNo, model.Password, isPersistent: false, lockoutOnFailure: false);
-                if (result.Succeeded)
+                var user = await _userManager.FindByNameAsync(model.EmployeeNo);
+                if (user != null  && await _userManager.CheckPasswordAsync(user, model.Password))
                 {
-                    return LocalRedirect(returnUrl ?? "/");
+                    
+                    var previousLoginTime = user.LastLoginTime;
+
+                   
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, isPersistent: false, lockoutOnFailure: false);
+
+                    if (result.Succeeded)
+                    {
+                        user.LastLoginTime = DateTime.UtcNow;
+                        await _userManager.UpdateAsync(user);
+
+                        
+                        TempData["PreviousLoginTime"] = previousLoginTime?.ToLocalTime().ToString("f");
+
+                        return LocalRedirect(returnUrl ?? "/");
+                    }
                 }
+                
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             }
             return View(model);
@@ -66,9 +81,8 @@ namespace ClaimsMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                // --- THIS IS THE NEW, CORRECT LOGIC ---
 
-                // 1. Check if the employee exists in the company's master list.
+                
                 var companyEmployee = await _context.CompanyEmployees
                     .FirstOrDefaultAsync(e => e.EmployeeNo == model.EmployeeNo);
 
@@ -78,7 +92,7 @@ namespace ClaimsMVC.Controllers
                     return View(model);
                 }
 
-                // 2. Check if an online account has already been created for this employee.
+                
                 var existingUser = await _userManager.FindByNameAsync(model.EmployeeNo);
                 if (existingUser != null)
                 {
@@ -86,7 +100,7 @@ namespace ClaimsMVC.Controllers
                     return View(model);
                 }
 
-                // If checks pass, create the new user using the submitted details.
+          
                 var user = new User
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -94,9 +108,9 @@ namespace ClaimsMVC.Controllers
                     EmployeeNo = model.EmployeeNo,
                     FullName = model.FullName,
                     Email = model.Email,
-                    // Auto-assign the designation from the master list.
+                   
                     DesignationId = companyEmployee.DesignationId,
-                    EmailConfirmed = true // The email is now considered confirmed by default.
+                    EmailConfirmed = true 
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -104,7 +118,7 @@ namespace ClaimsMVC.Controllers
                 {
                     await _userManager.AddToRoleAsync(user, "Employee");
 
-                    // Immediately sign the new user in and redirect to the home page.
+                   
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Home");
                 }
