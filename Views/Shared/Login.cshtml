@@ -1,9 +1,9 @@
-@{
+<!--@{
     // This tells the page to use the simple layout without a navigation bar.
     Layout = "_LayoutLoggedOut";
     ViewData["Title"] = "Log In";
 }
-@model LoginViewModel
+
 
 <h3 class="text-center mb-4">@ViewData["Title"]</h3>
 
@@ -16,18 +16,16 @@
 
 <form asp-action="Login" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-    <div class="form-floating mb-3">
+    <div class="form-floating mb-3">-->
+<!-- FIX: Changed from asp-for="Input.EmployeeNo" to just "EmployeeNo" -->
+<!--<input asp-for="EmployeeNo" class="form-control" placeholder="Employee Number" />
+    <label asp-for="EmployeeNo"></label>
+    <span asp-validation-for="EmployeeNo" class="text-danger"></span>
 
-        <!-- FIX: Changed from asp-for="Input.EmployeeNo" to just "EmployeeNo" -->
-        <input asp-for="EmployeeNo" class="form-control" placeholder="Employee Number" />
-        <label asp-for="EmployeeNo"></label>
-        <span asp-validation-for="EmployeeNo" class="text-danger"></span>
-
-    </div>
-    <div class="form-floating mb-3">
-
-        <!-- FIX: Changed from asp-for="Input.Password" to just "Password" -->
-        <input asp-for="Password" class="form-control" type="password" placeholder="Password" />
+</div>
+<div class="form-floating mb-3">-->
+<!-- FIX: Changed from asp-for="Input.Password" to just "Password" -->
+<!--<input asp-for="Password" class="form-control" type="password" placeholder="Password" />
         <label asp-for="Password"></label>
         <span asp-validation-for="Password" class="text-danger"></span>
 
@@ -40,4 +38,113 @@
             <a asp-action="Register">Register as a new user</a>
         </p>
     </div>
-</form>
+</form>-->
+
+@{
+    Layout = "_LayoutLoggedOut";
+    ViewData["Title"] = "Log In";
+}
+@model LoginViewModel
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    .clean-login-container {
+        /* RESTORED: Warm off-white background */
+        background-color: #FDFEFE;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .login-card {
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .form-control {
+        border-radius: 0.375rem;
+        padding: 0.75rem 1rem;
+    }
+
+        .form-control:focus {
+            /* RESTORED: Gold color for input focus */
+            border-color: #FFC107;
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+        }
+
+    /* RESTORED: Gold button style */
+    .btn-gold {
+        background-color: #FFC107;
+        border-color: #FFC107;
+        color: #212529;
+        font-weight: 500;
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-gold:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
+        }
+
+    /* RESTORED: Gold link style */
+    .link-gold {
+        color: #B8860B;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .link-gold:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<div class="clean-login-container">
+    <div class="login-card">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <h2 class="fw-normal">Welcome Back</h2>
+                <p class="text-muted">Please sign in to continue</p>
+            </div>
+
+            @if (TempData["StatusMessage"] != null) {
+            <div class="alert alert-success" role="alert">@TempData["StatusMessage"]</div>
+            }
+
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 small" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="EmployeeNo" class="form-label"></label>
+                    <input asp-for="EmployeeNo" class="form-control" placeholder="Your employee number" />
+                    <span asp-validation-for="EmployeeNo" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" type="password" placeholder="Your password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-lg btn-gold">Log In</button>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a asp-action="Register" class="link-gold">Register as a new user</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

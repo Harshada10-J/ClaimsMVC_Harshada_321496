@@ -1,35 +1,144 @@
-﻿@*@model EmployeeDashboardViewModel
-    @{
-        ViewData["Title"] = "Dashboard";
+﻿@model EmployeeDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
     }
 
-    <div class="main-content-card">
-        <div class="text-center border-bottom pb-4 mb-4">
-            <h1 class="display-5">Welcome, @Model.FullName!</h1>
-            <p class="lead text-muted">Your one-stop place to manage your medical claims.</p>
+    .glass-theme-bg {
+        background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop');
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 1rem;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .text-light-emphasis {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .text-light-muted {
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+    /* Button Styles */
+    .btn-gold {
+        background-color: #FFC107;
+        border-color: #FFC107;
+        color: #212529;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+        .btn-gold:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
+            color: #212529;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+        }
+
+    .btn-outline-gold {
+        color: #FFC107;
+        border-color: #FFC107;
+    }
+
+        .btn-outline-gold:hover {
+            color: #212529;
+            background-color: #FFC107;
+            border-color: #FFC107;
+        }
+
+    /* Custom Status Badges */
+    .badge-glass {
+        padding: 0.5em 0.75em !important;
+        font-weight: 500;
+        border: 1px solid;
+    }
+
+    .badge-glass-success {
+        background-color: rgba(40, 167, 69, 0.25);
+        border-color: rgba(40, 167, 69, 0.5);
+        color: #28a745;
+    }
+
+    .badge-glass-danger {
+        background-color: rgba(220, 53, 69, 0.25);
+        border-color: rgba(220, 53, 69, 0.5);
+        color: #dc3545;
+    }
+
+    .badge-glass-pending {
+        background-color: rgba(255, 193, 7, 0.25);
+        border-color: rgba(255, 193, 7, 0.5);
+        color: #ffc107;
+    }
+
+    .badge-glass-secondary {
+        background-color: rgba(108, 117, 125, 0.25);
+        border-color: rgba(108, 117, 125, 0.5);
+        color: #6c757d;
+    }
+
+    /* Table Styles */
+    .table-glass {
+        color: #fff;
+    }
+
+        .table-glass th {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+            font-weight: 500;
+        }
+
+        .table-glass td, .table-glass th {
+            border-top: none;
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .table-glass tbody tr {
+            border: none;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+            .table-glass tbody tr:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+</style>
+
+<script>document.body.classList.add('glass-theme-bg');</script>
+
+<div class="container-fluid py-4">
+    <div class="glass-panel p-4 p-md-5">
+        <div class="glass-panel text-center p-4 p-lg-5 mb-4" style="background: rgba(0,0,0,0.1);">
+            <h1 class="display-5 text-light-emphasis">Welcome, @Model.FullName!</h1>
+            <p class="lead text-light-muted">Your one-stop place to manage your medical claims.</p>
             <div class="mt-2">
-                @if (Model.LastLoginTime.HasValue)
-                {
-                <small class="text-muted">Your last login was on: @Model.LastLoginTime.Value.ToLocalTime().ToString("f")</small>
-                }
-                else
-                {
-                <small class="text-muted">This appears to be your first time logging in. Welcome!</small>
+                @if (!string.IsNullOrEmpty(Model.PreviousLoginTime)) {
+                <small class="text-light-muted">Your last login was on: @Model.PreviousLoginTime</small>
+                } else {
+                <small class="text-light-muted">This is your first time logging in. Welcome!</small>
                 }
             </div>
-            <a class="btn btn-primary btn-lg mt-3" asp-controller="Claims" asp-action="Submit">
-                <svg xmlns="http://www.w.3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill me-2" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z" /></svg>
+            <a class="btn btn-gold btn-lg mt-4 px-5" asp-controller="Claims" asp-action="Submit">
                 Submit a New Claim
             </a>
         </div>
-
-        <h4 class="mt-4">Your 5 Most Recent Claims</h4>
-
-        @if (Model.RecentClaims.Any())
-        {
-        <div class="table-responsive">
-            <table class="table table-hover table-bordered align-middle mt-3">
-                <thead class="table-light">
+        <h4 class="mt-5 text-light-emphasis">Your 5 Most Recent Claims</h4>
+        @if (Model.RecentClaims.Any()) {
+        <div class="table-responsive mt-3">
+            <table class="table table-glass align-middle">
+                <thead>
                     <tr>
                         <th>Claim ID</th>
                         <th>Submission Date</th>
@@ -39,120 +148,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var claim in Model.RecentClaims)
-                        {
+                    @foreach (var claim in Model.RecentClaims) {
                     <tr>
                         <td>@claim.ClaimId</td>
                         <td>@claim.SubmissionDate.ToShortDateString()</td>
                         <td>
                             @{
-                                        var statusClass = claim.Status switch
-                                        {
-                                            "Approved" => "bg-success",
-                                            "Rejected" => "bg-danger",
-                                            "Pending" => "bg-warning text-dark",
-                                            _ => "bg-secondary"
+                                        var statusClass = claim.Status switch {
+                                            "Approved" => "badge-glass-success",
+                                            "Rejected" => "badge-glass-danger",
+                                            "Pending" => "badge-glass-pending",
+                                            _ => "badge-glass-secondary"
                                         };
                             }
-                            <span class="badge @statusClass rounded-pill p-2">@claim.Status</span>
+                            <span class="badge @statusClass rounded-pill">@claim.Status</span>
                         </td>
                         <td class="text-end">₹@claim.TotalAmount.ToString("N2")</td>
                         <td class="text-center">
-                            <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-outline-primary btn-sm">Details</a>
+                            <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-outline-gold btn-sm">Details</a>
                         </td>
                     </tr>
                         }
                 </tbody>
             </table>
         </div>
-        }
-        else
-        {
-        <div class="alert alert-secondary mt-3">
+        } else {
+        <div class="text-center p-4 mt-3 text-light-muted">
             You have not submitted any claims yet. Click the "Submit a New Claim" button to get started!
         </div>
         }
-    </div>*@
-
-
-
-
-
-@model EmployeeDashboardViewModel
-@{
-    ViewData["Title"] = "Dashboard";
-}
-
-<div class="main-content-card">
-    <div class="text-center border-bottom pb-4 mb-4">
-        <h1 class="display-5">Welcome, @Model.FullName!</h1>
-        <p class="lead text-muted">Your one-stop place to manage your medical claims.</p>
-
-        <!-- START: THIS IS THE NEW DISPLAY LOGIC -->
-        <div class="mt-2">
-            @if (!string.IsNullOrEmpty(Model.PreviousLoginTime))
-            {
-            <small class="text-muted">Your last login was on: @Model.PreviousLoginTime</small>
-            }
-            else
-            {
-            <small class="text-muted">This is your first time logging in. Welcome!</small>
-            }
-        </div>
-        <!-- END: NEW DISPLAY LOGIC -->
-
-        <a class="btn btn-primary btn-lg mt-3" asp-controller="Claims" asp-action="Submit">
-            Submit a New Claim
-        </a>
     </div>
-
-    <h4 class="mt-4">Your 5 Most Recent Claims</h4>
-
-    @if (Model.RecentClaims.Any())
-    {
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered align-middle mt-3">
-            <thead class="table-light">
-                <tr>
-                    <th>Claim ID</th>
-                    <th>Submission Date</th>
-                    <th>Status</th>
-                    <th class="text-end">Amount Claimed</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var claim in Model.RecentClaims)
-                    {
-                <tr>
-                    <td>@claim.ClaimId</td>
-                    <td>@claim.SubmissionDate.ToShortDateString()</td>
-                    <td>
-                        @{
-                                    var statusClass = claim.Status switch
-                                    {
-                                        "Approved" => "bg-success",
-                                        "Rejected" => "bg-danger",
-                                        "Pending" => "bg-warning text-dark",
-                                        _ => "bg-secondary"
-                                    };
-                        }
-                        <span class="badge @statusClass rounded-pill p-2">@claim.Status</span>
-                    </td>
-                    <td class="text-end">₹@claim.TotalAmount.ToString("N2")</td>
-                    <td class="text-center">
-                        <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-outline-primary btn-sm">Details</a>
-                    </td>
-                </tr>
-                    }
-            </tbody>
-        </table>
-    </div>
-    }
-    else
-    {
-    <div class="alert alert-secondary mt-3">
-        You have not submitted any claims yet. Click the "Submit a New Claim" button to get started!
-    </div>
-    }
 </div>

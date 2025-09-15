@@ -1,71 +1,152 @@
-﻿
-
-@model CpdDashboardViewModel
+﻿@model CpdDashboardViewModel
 @{
     ViewData["Title"] = "CPD Dashboard";
 }
 
-<div class="main-content-card">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="display-6 mb-0">Claims Dashboard</h1>
-        <a class="btn btn-primary" asp-controller="Claims" asp-action="History">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder-fill me-2" viewBox="0 0 16 16"><path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z" /></svg>
-            View Full History
-        </a>
-    </div>
+<style>
+    /* The Poppins font is essential for this design */
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card text-white bg-warning mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="me-3">
-                            <div class="text-white-75 small">Pending Review</div>
-                            <div class="text-lg fw-bold">@Model.PendingClaimsCount Claims</div>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .586.023l-.07-.004.07.004zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.036c.386.07.76.18 1.126.322l-.36.113zM8.5 5.5a.5.5 0 0 0-1 0v3.352l-2.862 2.862a.5.5 0 0 0 .707.707l2.5-2.5a.5.5 0 0 0 .146-.353V5.5z" /><path d="M8 16a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm7-8a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" /></svg>
-                    </div>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" asp-controller="Claims" asp-action="History" asp-route-status="Pending">View All Pending Claims</a>
-                    <div class="small text-white"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" /></svg></div>
-                </div>
+    /* The subtle, professional background for the entire page */
+    .glass-theme-bg {
+        background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop');
+        background-size: cover;
+        background-attachment: fixed; /* Keeps the background still on scroll */
+    }
+
+    /* The main glass panel style */
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.05); /* Very subtle white tint */
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 1rem; /* Softer, modern corners */
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .text-light-emphasis {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .text-light-muted {
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+    /* Button Styles */
+    .btn-gold {
+        background-color: #FFC107;
+        border-color: #FFC107;
+        color: #212529;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+        .btn-gold:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
+            color: #212529;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+        }
+
+    .btn-outline-gold {
+        color: #FFC107;
+        border-color: #FFC107;
+        font-weight: 500;
+    }
+
+        .btn-outline-gold:hover {
+            color: #212529;
+            background-color: #FFC107;
+            border-color: #FFC107;
+        }
+
+    /* Table Styles for the glass theme */
+    .table-glass {
+        color: #fff;
+    }
+
+        .table-glass th {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .table-glass td, .table-glass th {
+            border-top: none;
+            padding: 1rem;
+        }
+
+        .table-glass tbody tr {
+            border: none;
+        }
+
+            .table-glass tbody tr:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+</style>
+
+<script>document.body.classList.add('glass-theme-bg');</script>
+
+<div class="container-fluid py-4">
+    <div class="glass-panel p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="display-6 mb-0 text-light-emphasis">Claims Dashboard</h1>
+            <div>
+                <a class="btn btn-outline-gold me-2" asp-controller="Audit" asp-action="Index">View Audit Log</a>
+                <a class="btn btn-gold" asp-controller="Claims" asp-action="History">View Full History</a>
             </div>
         </div>
     </div>
 
-    <h4 class="mt-4">Recently Submitted Claims</h4>
-    @if (Model.RecentPendingClaims.Any())
-    {
-    <table class="table table-hover table-bordered align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>Claim ID</th>
-                <th>Employee Name</th>
-                <th>Date</th>
-                <th class="text-end">Amount</th>
-                <th class="text-center">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var claim in Model.RecentPendingClaims)
-                {
-            <tr>
-                <td>@claim.ClaimId</td>
-                <td>@claim.User?.FullName</td>
-                <td>@claim.SubmissionDate.ToShortDateString()</td>
-                <td class="text-end">₹@claim.TotalAmount.ToString("N2")</td>
-                <td class="text-center">
-                    <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-primary btn-sm">Review</a>
-                </td>
-            </tr>
-                }
-        </tbody>
-    </table>
-    }
-    else
-    {
-    <div class="alert alert-secondary mt-3">There are no pending claims at this time.</div>
-    }
-</div>
+    <div class="glass-panel p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div class="text-light-muted small">Pending Review</div>
+                <div class="display-6 fw-bold text-white">@Model.PendingClaimsCount Claims</div>
+            </div>
+            <a class="stretched-link text-light-emphasis" asp-controller="Claims" asp-action="History" asp-route-status="Pending">
+                <span>View All</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short ms-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z" /></svg>
+            </a>
+        </div>
+    </div>
 
+    <div class="glass-panel p-4">
+        <h4 class="text-light-emphasis mb-3">Recently Submitted Claims</h4>
+        @if (Model.RecentPendingClaims.Any())
+        {
+        <div class="table-responsive">
+            <table class="table table-glass align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Employee Name</th>
+                        <th>Date</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model.RecentPendingClaims)
+                        {
+                    <tr>
+                        <td>@claim.ClaimId</td>
+                        <td>@claim.User?.FullName</td>
+                        <td>@claim.SubmissionDate.ToShortDateString()</td>
+                        <td class="text-end">₹@claim.TotalAmount.ToString("N2")</td>
+                        <td class="text-center">
+                            <a asp-controller="Claims" asp-action="Details" asp-route-id="@claim.ClaimId" class="btn btn-outline-gold btn-sm">Review</a>
+                        </td>
+                    </tr>
+                        }
+                </tbody>
+            </table>
+        </div>
+        }
+        else
+        {
+        <div class="text-center p-4 text-light-muted">There are no pending claims at this time.</div>
+        }
+    </div>
+</div>

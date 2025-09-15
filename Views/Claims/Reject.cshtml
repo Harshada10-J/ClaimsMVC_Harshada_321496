@@ -3,30 +3,106 @@
     ViewData["Title"] = "Reject Claim";
 }
 
-<div class="main-content-card">
-    <h2 class="mb-4">@ViewData["Title"]</h2>
-    <h3>Are you sure you want to reject this claim for @Model.EmployeeName?</h3>
-    <hr />
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
 
-    <div class="row">
-        <div class="col-md-6">
-            <form asp-action="Reject" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+    .glass-theme-bg {
+        background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop');
+        background-size: cover;
+        background-attachment: fixed;
+    }
 
-              
-                <input type="hidden" asp-for="ClaimId" />
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 1rem;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
 
-                <div class="form-floating mb-3">
-                    <textarea asp-for="Reason" class="form-control" placeholder="Reason for Rejection" style="height: 120px"></textarea>
-                    <label asp-for="Reason" class="control-label"></label>
-                    <span asp-validation-for="Reason" class="text-danger"></span>
-                </div>
+    .text-light-emphasis {
+        color: rgba(255, 255, 255, 0.85);
+    }
 
-                <div class="form-group mt-4">
-                    <input type="submit" value="Confirm Rejection" class="btn btn-danger btn-lg" />
-                    <a asp-action="Details" asp-route-id="@Model.ClaimId" class="btn btn-secondary btn-lg">Cancel</a>
-                </div>
-            </form>
+    .text-light-muted {
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+    /* Form Controls */
+    .form-control-glass {
+        background: rgba(0, 0, 0, 0.2) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: #fff !important;
+        border-radius: 0.5rem;
+    }
+
+        .form-control-glass:focus {
+            border-color: #FFC107 !important;
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25) !important;
+        }
+
+    .form-floating > label {
+        color: rgba(255, 255, 255, 0.65);
+    }
+
+    /* Button Styles */
+    .btn-danger-glass {
+        color: #fff;
+        background-color: #dc3545;
+        border-color: #dc3545;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+        .btn-danger-glass:hover {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+            opacity: 1;
+        }
+
+    .btn-outline-light {
+        color: #f8f9fa;
+        border-color: #f8f9fa;
+    }
+
+        .btn-outline-light:hover {
+            color: #000;
+            background-color: #f8f9fa;
+            border-color: #f8f9fa;
+        }
+</style>
+
+<script>document.body.classList.add('glass-theme-bg');</script>
+
+<div class="container-fluid py-4">
+    <div class="glass-panel p-4 p-md-5">
+        <h2 class="mb-3 text-light-emphasis">@ViewData["Title"]</h2>
+        <p class="h4 fw-light text-light-muted">Are you sure you want to reject this claim for <strong>@Model.EmployeeName</strong>?</p>
+        <hr class="my-4" style="border-color: rgba(255,255,255,0.2);" />
+
+        <div class="row">
+            <div class="col-md-8 col-lg-6">
+                <form asp-action="Reject" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 small" role="alert"></div>
+
+                    <input type="hidden" asp-for="ClaimId" />
+
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Reason" class="form-control form-control-glass" placeholder="Reason for Rejection" style="height: 120px"></textarea>
+                        <label asp-for="Reason" class="control-label"></label>
+                        <span asp-validation-for="Reason" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <input type="submit" value="Confirm Rejection" class="btn btn-danger-glass btn-lg" />
+                        <a asp-action="Details" asp-route-id="@Model.ClaimId" class="btn btn-outline-light btn-lg ms-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

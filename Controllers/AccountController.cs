@@ -16,12 +16,15 @@ namespace ClaimsMVC.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly EmailService _emailService;
         private readonly ClaimsContextDB _context;
+        private readonly AuditService _auditService;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, EmailService emailService, ClaimsContextDB context)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, EmailService emailService, AuditService auditService, ClaimsContextDB context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
+            _auditService = auditService;
+
             _context = context;
         }
 
@@ -57,7 +60,7 @@ namespace ClaimsMVC.Controllers
 
                         
                         TempData["PreviousLoginTime"] = previousLoginTime?.ToLocalTime().ToString("f");
-
+                        await _auditService.LogActionAsync("User Logged In", $"User '{user.FullName}' ({user.EmployeeNo}) logged in.");
                         return LocalRedirect(returnUrl ?? "/");
                     }
                 }
@@ -120,6 +123,8 @@ namespace ClaimsMVC.Controllers
 
                    
                     await _signInManager.SignInAsync(user, isPersistent: false);
+                    await _auditService.LogActionAsync("User Registered", $"New user '{user.FullName}' ({user.EmployeeNo}) registered an account.");
+
                     return RedirectToAction("Index", "Home");
                 }
                 foreach (var error in result.Errors)
@@ -131,12 +136,18 @@ namespace ClaimsMVC.Controllers
         }
 
 
- 
+
         // POST: /Account/Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                // --- LOG THE LOGOUT ACTION ---
+                await _auditService.LogActionAsync("User Logged Out", $"User '{user.FullName}' ({user.EmployeeNo}) logged out.");
+            }
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }

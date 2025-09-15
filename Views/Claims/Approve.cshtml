@@ -1,87 +1,119 @@
-﻿
-
-@model ApproveClaimViewModel
-
+﻿@model ApproveClaimViewModel
 @{
-
-    ViewData["Title"] = "Approve Claim";
-
+    ViewData["Title"] = "Approve Claim";
 }
 
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
 
+    .glass-theme-bg {
+        background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto-format&fit=crop');
+        background-size: cover;
+        background-attachment: fixed;
+    }
 
-<h1>@ViewData["Title"]</h1>
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 1rem;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
 
-<hr />
+    .text-light-emphasis {
+        color: rgba(255, 255, 255, 0.85);
+    }
 
+    .text-light-muted {
+        color: rgba(255, 255, 255, 0.65);
+    }
 
+    /* Form Controls */
+    .form-control-glass {
+        background: rgba(0, 0, 0, 0.2) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: #fff !important;
+        border-radius: 0.5rem;
+    }
 
-<div class="row">
+        .form-control-glass:focus {
+            border-color: #FFC107 !important;
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25) !important;
+        }
 
-    <div class="col-md-6">
+    /* Button Styles */
+    .btn-success-glass {
+        color: #fff;
+        background-color: #28a745;
+        border-color: #28a745;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
 
-        <dl class="row">
+        .btn-success-glass:hover {
+            color: #fff;
+            background-color: #28a745;
+            border-color: #28a745;
+            opacity: 1;
+        }
 
-            <dt class="col-sm-5">Employee Name</dt>
+    .btn-outline-light {
+        color: #f8f9fa;
+        border-color: #f8f9fa;
+    }
 
-            <dd class="col-sm-7">@Model.EmployeeName</dd>
+        .btn-outline-light:hover {
+            color: #000;
+            background-color: #f8f9fa;
+            border-color: #f8f9fa;
+        }
+</style>
 
+<script>document.body.classList.add('glass-theme-bg');</script>
 
+<div class="container-fluid py-4">
+    <div class="glass-panel p-4 p-md-5">
+        <h2 class="mb-4 text-light-emphasis">@ViewData["Title"]</h2>
 
-            <dt class="col-sm-5">Total Amount Claimed</dt>
+        <div class="row">
+            <div class="col-lg-8 col-xl-6">
 
-            <dd class="col-sm-7">₹@Model.TotalAmount.ToString("N2")</dd>
+                <div class="glass-panel p-4 mb-4" style="background: rgba(0,0,0,0.15);">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5 text-light-muted fw-light">Employee Name</dt>
+                        <dd class="col-sm-7 text-light-emphasis">@Model.EmployeeName</dd>
 
+                        <dt class="col-sm-5 text-light-muted fw-light">Total Amount Claimed</dt>
+                        <dd class="col-sm-7 text-light-emphasis">₹@Model.TotalAmount.ToString("N2")</dd>
 
+                        <dt class="col-sm-5 text-light-muted fw-light">Employee's Annual Limit</dt>
+                        <dd class="col-sm-7 text-light-emphasis">₹@Model.EmployeeClaimLimit.ToString("N2")</dd>
 
-            <dt class="col-sm-5">Employee's Annual Limit</dt>
+                        <dt class="col-sm-5 text-light-muted fw-light">Remaining Balance</dt>
+                        <dd class="col-sm-7 text-light-emphasis">₹@Model.RemainingClaimableAmount.ToString("N2")</dd>
+                    </dl>
+                </div>
 
-            <dd class="col-sm-7">₹@Model.EmployeeClaimLimit.ToString("N2")</dd>
+                <form asp-action="Approve" method="post">
+                    <div asp-validation-summary="All" class="alert alert-danger p-2 small" role="alert"></div>
 
+                    <input type="hidden" asp-for="ClaimId" />
 
+                    <div class="form-group mb-3">
+                        <label asp-for="ApprovedAmount" class="control-label form-label text-light-muted"></label>
+                        <input asp-for="ApprovedAmount" class="form-control form-control-glass" />
+                        <span asp-validation-for="ApprovedAmount" class="text-danger"></span>
+                    </div>
 
-            <!-- This is the new section to display the remaining balance -->
-
-            <dt class="col-sm-5">Remaining Balance</dt>
-
-            <dd class="col-sm-7">₹@Model.RemainingClaimableAmount.ToString("N2")</dd>
-
-        </dl>
-
-
-
-        <form asp-action="Approve" method="post">
-
-            <div asp-validation-summary="All" class="text-danger" role="alert"></div>
-
-
-
-            <input type="hidden" asp-for="ClaimId" />
-
-
-
-            <div class="form-group mb-3">
-
-                <label asp-for="ApprovedAmount" class="control-label"></label>
-
-                <input asp-for="ApprovedAmount" class="form-control" />
-
-                <span asp-validation-for="ApprovedAmount" class="text-danger"></span>
-
+                    <div class="form-group mt-4">
+                        <input type="submit" value="Confirm Approval" class="btn btn-success-glass btn-lg" />
+                        <a asp-action="Details" asp-route-id="@Model.ClaimId" class="btn btn-outline-light btn-lg ms-2">Cancel</a>
+                    </div>
+                </form>
             </div>
-
-
-
-            <div class="form-group">
-
-                <input type="submit" value="Confirm Approval" class="btn btn-success" /> |
-
-                <a asp-action="Details" asp-route-id="@Model.ClaimId" class="btn btn-secondary">Cancel</a>
-
-            </div>
-
-        </form>
-
+        </div>
     </div>
-
 </div>

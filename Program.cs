@@ -13,9 +13,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // 1. Add the Database Context
 builder.Services.AddDbContext<ClaimsContextDB>(options =>
     options.UseSqlServer(connectionString));
+// In Program.cs
 
 // 2. Add the complete Identity System
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, ApplicationRole>()
     .AddEntityFrameworkStores<ClaimsContextDB>()
     .AddDefaultTokenProviders();
 
@@ -35,7 +36,7 @@ builder.Services.AddControllersWithViews();
 // 5. Add your custom application services
 builder.Services.AddScoped<EmailService>();
 
-
+builder.Services.AddScoped<AuditService>();
 
 // --- APPLICATION PIPELINE ---
 
@@ -44,13 +45,13 @@ var app = builder.Build();
 // Seed the "Employee" and "CPD" roles on startup
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
     string[] roleNames = { "Employee", "CPD" };
     foreach (var roleName in roleNames)
     {
         if (!await roleManager.RoleExistsAsync(roleName))
         {
-            await roleManager.CreateAsync(new IdentityRole(roleName));
+            await roleManager.CreateAsync(new ApplicationRole(roleName));
         }
     }
 }
@@ -71,7 +72,7 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// This sets up the default URL pattern for MVC (e.g., /Controller/Action/Id)
+builder.Services.AddHttpContextAccessor();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

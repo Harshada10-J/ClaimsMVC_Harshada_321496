@@ -1,94 +1,234 @@
-﻿
-
-@model ClaimDetailsViewModel
+﻿@model ClaimDetailsViewModel
 @{
     ViewData["Title"] = "Claim Details";
 }
 
-<div class="main-content-card">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">@ViewData["Title"]</h2>
-        <span class="badge bg-primary rounded-pill fs-6">Claim ID: @Model.ClaimId</span>
-    </div>
-    <hr />
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
 
-    <h4>Summary</h4>
-    <div class="row mt-3 mb-4 fs-5">
-        <div class="col-md-6">
-            <dl class="row">
-                <dt class="col-sm-5 text-muted fw-light">Employee Name</dt>
-                <dd class="col-sm-7">@Model.FullName (@Model.EmployeeNo)</dd>
+    .glass-theme-bg {
+        background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop');
+        background-size: cover;
+        background-attachment: fixed;
+    }
 
-                <dt class="col-sm-5 text-muted fw-light">Submission Date</dt>
-                <dd class="col-sm-7">@Model.SubmissionDate.ToShortDateString()</dd>
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 1rem;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
 
-                <dt class="col-sm-5 text-muted fw-light">Status</dt>
-                <dd class="col-sm-7"><span class="badge bg-info text-dark">@Model.Status</span></dd>
-            </dl>
-        </div>
-        <div class="col-md-6">
-            <dl class="row">
-                <dt class="col-sm-5 text-muted fw-light">Total Claimed</dt>
-                <dd class="col-sm-7">₹@Model.TotalAmount.ToString("N2")</dd>
+    .text-light-emphasis {
+        color: rgba(255, 255, 255, 0.85);
+    }
 
-                <dt class="col-sm-5 text-muted fw-light">Amount Approved</dt>
-                <dd class="col-sm-7">@(Model.ApprovedAmount.HasValue ? "₹" + Model.ApprovedAmount.Value.ToString("N2") : "N/A")</dd>
+    .text-light-muted {
+        color: rgba(255, 255, 255, 0.65);
+    }
 
-                @if (!string.IsNullOrEmpty(Model.RejectionReason))
-                {
-                <dt class="col-sm-5 text-muted fw-light">Reason for Rejection</dt>
-                <dd class="col-sm-7 text-danger">@Model.RejectionReason</dd>
-                }
-            </dl>
-        </div>
-    </div>
+    /* Custom Status/ID Badges */
+    .badge-glass {
+        padding: 0.5em 0.75em !important;
+        font-weight: 500;
+        border: 1px solid;
+        font-size: 0.9em;
+    }
 
-    <h4 class="mt-4">Claimed Items</h4>
-    <table class="table table-striped table-bordered mt-3">
-        <thead class="table-light">
-            <tr>
-                <th>Item Name</th>
-                <th class="text-end" style="width: 20%;">Cost</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Items)
-            {
-            <tr>
-                <td>@item.ItemName</td>
-                <td class="text-end">₹@item.Cost.ToString("N2")</td>
-            </tr>
-            }
-        </tbody>
-        <tfoot class="table-group-divider">
-            <tr class="fw-bold">
-                <td class="text-end">Total:</td>
-                <td class="text-end">₹@Model.TotalAmount.ToString("N2")</td>
-            </tr>
-        </tfoot>
-    </table>
+    .badge-glass-gold {
+        background-color: rgba(255, 193, 7, 0.25);
+        border-color: rgba(255, 193, 7, 0.5);
+        color: #ffc107;
+    }
 
-    <hr class="my-4" />
+    .badge-glass-success {
+        background-color: rgba(40, 167, 69, 0.25);
+        border-color: rgba(40, 167, 69, 0.5);
+        color: #28a745;
+    }
 
-    <div class="d-flex justify-content-between">
-        <a asp-action="History" class="btn btn-secondary btn-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle-fill me-2" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z" /></svg>
-            Back to History
-        </a>
+    .badge-glass-danger {
+        background-color: rgba(220, 53, 69, 0.25);
+        border-color: rgba(220, 53, 69, 0.5);
+        color: #dc3545;
+    }
 
-        @if (User.IsInRole("CPD") && Model.Status == "Pending")
-        {
-        <div>
-            <a asp-controller="Claims" asp-action="Approve" asp-route-id="@Model.ClaimId" class="btn btn-success btn-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" /></svg>
-                Approve
-            </a>
-            <a asp-controller="Claims" asp-action="Reject" asp-route-id="@Model.ClaimId" class="btn btn-danger btn-lg ms-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z" /></svg>
-                Reject
-            </a>
-        </div>
+    .badge-glass-pending {
+        background-color: rgba(255, 193, 7, 0.25);
+        border-color: rgba(255, 193, 7, 0.5);
+        color: #ffc107;
+    }
+
+    .badge-glass-secondary {
+        background-color: rgba(108, 117, 125, 0.25);
+        border-color: rgba(108, 117, 125, 0.5);
+        color: #6c757d;
+    }
+
+    .text-danger-light {
+        color: #ff8a8a;
+    }
+    /* More readable red */
+
+    /* Custom Buttons for Actions */
+    .btn-outline-gold {
+        color: #FFC107;
+        border-color: #FFC107;
+    }
+
+        .btn-outline-gold:hover {
+            color: #212529;
+            background-color: #FFC107;
+            border-color: #FFC107;
         }
+
+    .btn-success-glass {
+        color: #28a745;
+        background-color: rgba(40, 167, 69, 0.25);
+        border-color: #28a745;
+    }
+
+        .btn-success-glass:hover {
+            color: #fff;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+    .btn-danger-glass {
+        color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.25);
+        border-color: #dc3545;
+    }
+
+        .btn-danger-glass:hover {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+    /* Table Styles */
+    .table-glass {
+        color: #fff;
+    }
+
+        .table-glass th {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+            font-weight: 500;
+        }
+
+        .table-glass td, .table-glass th {
+            border-top: none;
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .table-glass tfoot td {
+            font-weight: bold;
+            border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }
+</style>
+
+<script>document.body.classList.add('glass-theme-bg');</script>
+
+<div class="container-fluid py-4">
+    <div class="glass-panel p-4 p-md-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0 text-light-emphasis">@ViewData["Title"]</h2>
+            <span class="badge badge-glass badge-glass-gold rounded-pill">Claim ID: @Model.ClaimId</span>
+        </div>
+
+        <div class="glass-panel p-4 mb-4" style="background: rgba(0,0,0,0.15);">
+            <h4 class="text-light-emphasis mb-3">Summary</h4>
+            <div class="row fs-5">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-5 text-light-muted fw-light">Employee Name</dt>
+                        <dd class="col-sm-7 text-light-emphasis">@Model.FullName (@Model.EmployeeNo)</dd>
+                        <dt class="col-sm-5 text-light-muted fw-light">Submission Date</dt>
+                        <dd class="col-sm-7 text-light-emphasis">@Model.SubmissionDate.ToShortDateString()</dd>
+                        <dt class="col-sm-5 text-light-muted fw-light">Status</dt>
+                        <dd class="col-sm-7">
+                            @{
+                                var statusClass = Model.Status switch {
+                                    "Approved" => "badge-glass-success",
+                                    "Rejected" => "badge-glass-danger",
+                                    "Pending" => "badge-glass-pending",
+                                    _ => "badge-glass-secondary"
+                                };
+                            }
+                            <span class="badge @statusClass rounded-pill">@Model.Status</span>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-5 text-light-muted fw-light">Total Claimed</dt>
+                        <dd class="col-sm-7 text-light-emphasis">₹@Model.TotalAmount.ToString("N2")</dd>
+                        <dt class="col-sm-5 text-light-muted fw-light">Amount Approved</dt>
+                        <dd class="col-sm-7 text-light-emphasis">@(Model.ApprovedAmount.HasValue ? "₹" + Model.ApprovedAmount.Value.ToString("N2") : "N/A")</dd>
+                        @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                        {
+                        <dt class="col-sm-5 text-light-muted fw-light">Reason for Rejection</dt>
+                        <dd class="col-sm-7 text-danger-light">@Model.RejectionReason</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-4" style="background: rgba(0,0,0,0.15);">
+            <h4 class="text-light-emphasis mb-3">Claimed Items</h4>
+            <table class="table table-glass mt-3">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th class="text-end" style="width: 20%;">Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                    <tr>
+                        <td>@item.ItemName</td>
+                        <td class="text-end">₹@item.Cost.ToString("N2")</td>
+                    </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="text-end text-light-muted">Total:</td>
+                        <td class="text-end text-light-emphasis fs-5">₹@Model.TotalAmount.ToString("N2")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <hr class="my-4" style="border-color: rgba(255,255,255,0.2);" />
+
+        <div class="d-flex justify-content-between">
+            <a asp-action="History" class="btn btn-outline-gold btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle-fill me-2" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z" /></svg>
+                Back to History
+            </a>
+
+            @if (User.IsInRole("CPD") && Model.Status == "Pending")
+            {
+            <div>
+                <a asp-controller="Claims" asp-action="Approve" asp-route-id="@Model.ClaimId" class="btn btn-success-glass btn-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" /></svg>
+                    Approve
+                </a>
+                <a asp-controller="Claims" asp-action="Reject" asp-route-id="@Model.ClaimId" class="btn btn-danger-glass btn-lg ms-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill me-2" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z" /></svg>
+                    Reject
+                </a>
+            </div>
+            }
+        </div>
     </div>
 </div>
-

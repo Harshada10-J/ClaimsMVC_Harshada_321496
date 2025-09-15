@@ -22,13 +22,15 @@ namespace ClaimsMVC.Controllers
         private readonly UserManager<User> _userManager;
         private readonly EmailService _emailService;
         private readonly IConfiguration _configuration;
+        private readonly AuditService _auditService;
 
-        public ClaimsController(ClaimsContextDB context, UserManager<User> userManager, EmailService emailService, IConfiguration configuration)
+        public ClaimsController(ClaimsContextDB context, UserManager<User> userManager, EmailService emailService, IConfiguration configuration, AuditService auditService)
         {
             _context = context;
             _userManager = userManager;
             _emailService = emailService;
             _configuration = configuration;
+            _auditService = auditService;
         }
 
         // Action for submitting a new claim
@@ -44,6 +46,7 @@ namespace ClaimsMVC.Controllers
         {
             if (ModelState.IsValid)
             {
+                var user = await _userManager.GetUserAsync(User);
                 var userId = _userManager.GetUserId(User);
                 var newClaim = new ClaimsMVC.Data.Models.Claim
                 {
@@ -60,7 +63,7 @@ namespace ClaimsMVC.Controllers
 
                 _context.Claims.Add(newClaim);
                 await _context.SaveChangesAsync();
-
+                await _auditService.LogActionAsync("Claim Submitted", $"User '{user.FullName}' submitted Claim #{newClaim.ClaimId} for ₹{newClaim.TotalAmount:N2}.");
                 return RedirectToAction("History"); 
             }
             return View(model);
@@ -208,7 +211,8 @@ namespace ClaimsMVC.Controllers
                 claim.Status = "Approved";
                 claim.ApprovedAmount = model.ApprovedAmount;
                 await _context.SaveChangesAsync();
-
+                var approver = await _userManager.GetUserAsync(User);
+                await _auditService.LogActionAsync("Claim Approved", $"CPD User '{approver.FullName}' approved Claim #{claim.ClaimId} for employee '{claim.User.FullName}'.");
                 // Send notifications
                 var bankEmail = _configuration["BankEmailAddress"];
                 var employeeEmail = claim.User.Email;
@@ -258,8 +262,9 @@ namespace ClaimsMVC.Controllers
         {
             if (!ModelState.IsValid)
             {
-
-
+                var claimToUpdate = await _context.Claims.Include(c => c.User).FirstOrDefaultAsync(c => c.ClaimId == model.ClaimId);
+                claimToUpdate.Status = "Rejected";
+                claimToUpdate.RejectionReason = model.Reason;
                 var claim = await _context.Claims.FindAsync(model.ClaimId);
                 if (claim == null) return NotFound();
 
@@ -267,7 +272,8 @@ namespace ClaimsMVC.Controllers
                 claim.RejectionReason = model.Reason;
                 claim.ApprovedAmount = 0;
                 await _context.SaveChangesAsync();
-
+                var rejector = await _userManager.GetUserAsync(User);
+                await _auditService.LogActionAsync("Claim Rejected", $"CPD User '{rejector.FullName}' rejected Claim #{claimToUpdate.ClaimId} for employee '{claimToUpdate.User.FullName}'. Reason: {model.Reason}");
                 return RedirectToAction("History");
             }
             return View(model);
