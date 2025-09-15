@@ -1,4 +1,4 @@
-Web Based Claims Processing System (MVC)
+**Web Based Claims Processing System (MVC)**
 This is a complete, end-to-end web application built with ASP.NET Core MVC to automate the process of medical expense reimbursement for a company. 
 Secure User Authentication: A full registration and login system built with ASP.NET Core Identity.
 Role-Based Access Control: The application distinguishes between two main roles:
@@ -54,6 +54,6 @@ dotnet build
 
 Run the Application
 The best way to run the application for development is to use the https launch profile.
-dotnet run --launch-profile https
 
+**dotnet run --launch-profile https**
 
